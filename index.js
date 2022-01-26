@@ -40,7 +40,7 @@ async function run() {
       const result = await formList.insertOne(form);
 
       const newForm = {
-        id: result.insertedId,
+        _id: result.insertedId,
         name: form.name,
         fieldTypes: form.fieldTypes,
         fieldLabels: form.fieldLabels,
