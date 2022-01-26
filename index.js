@@ -69,8 +69,13 @@ async function run() {
       const options = { upsert: true };
       const updateDoc = { $set: result };
       const response = await formList.updateOne(filter, updateDoc, options);
-      res.json(response);
-      console.log(response);
+      res.json({
+        _id: formData.id,
+        modifiedCount: response.modifiedCount,
+        labels: formData.labels,
+        values: formData.values,
+      });
+      // console.log(response);
     });
 
     // Delete - Delete a form formList
