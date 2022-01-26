@@ -1,6 +1,7 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
 require("dotenv").config();
 
 const app = express();
@@ -36,8 +37,6 @@ async function run() {
     // POST - Save new form to form list
     app.post("/form-list", async (req, res) => {
       const form = req.body;
-
-      console.log(form);
       const result = await formList.insertOne(form);
 
       const newForm = {
@@ -47,6 +46,39 @@ async function run() {
         fieldLabels: form.fieldLabels,
       };
       res.json(newForm);
+    });
+
+    // PUT - Update a specific form data
+    app.put("/form-list", async (req, res) => {
+      const formData = req.body;
+      //   console.log(formData);
+
+      // Find the specific form
+      const query = { _id: ObjectId(formData.id) };
+      const result = await formList.findOne(query);
+
+      if (result.formData) {
+        result.formData.values.push(formData.values);
+      } else {
+        result.formData = {
+          labels: formData.labels,
+          values: [formData.values],
+        };
+      }
+      const filter = { _id: ObjectId(formData.id) };
+      const options = { upsert: true };
+      const updateDoc = { $set: result };
+      const response = await formList.updateOne(filter, updateDoc, options);
+      res.json(response);
+      console.log(response);
+    });
+
+    // Delete - Delete a form formList
+    app.delete("/form-list/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await formList.deleteOne(query);
+      res.json({ _id: id, deletedCount: result.deletedCount });
     });
   } finally {
     // await client.close();
